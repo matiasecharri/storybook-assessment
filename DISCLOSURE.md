@@ -80,6 +80,10 @@ completed answers announced automatically or prefer reading them from the log. I
 coverage for component states not exercised by the stories and repeat the visual review after
 final changes, especially spacing between turns, the empty state and dark-theme surfaces.
 
+I would also promote spacing to tokens. The kit ships colour, radius and a family, but no spacing
+scale, so density currently lives in utilities spread across the components rather than in one
+place — the same decision the colour tokens already centralise.
+
 ---
 
 **Optional further reading.** [DISCLOSURE-EXTENDED.md](./DISCLOSURE-EXTENDED.md) is the long version:
