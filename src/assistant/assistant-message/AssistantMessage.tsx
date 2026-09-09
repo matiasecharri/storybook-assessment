@@ -282,24 +282,23 @@ function FailedTurn({
 }: Pick<AssistantMessageProps, 'message' | 'onRetry' | 'retryDisabled'>) {
   return (
     <div className="w-full rounded-[var(--radius-md)] border border-danger bg-danger-surface p-3">
-      <div className="flex gap-2">
-        {/* Centred on the first line of 16/28 body text: (28 - 16) / 2. */}
-        <TriangleAlert aria-hidden="true" className="mt-1.5 size-4 shrink-0 text-danger" />
-        <div className="min-w-0 flex-1">
-          <Text size="body">{message.content || 'The assistant could not finish this turn.'}</Text>
-          {onRetry ? (
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => onRetry(message.id)}
-              disabled={retryDisabled}
-              className="mt-2 border-border-default bg-bg-surface text-text-primary hover:bg-bg-subtle focus-visible:ring-offset-0"
-            >
-              <RotateCcw aria-hidden="true" className="size-3.5" />
-              Retry
-            </Button>
-          ) : null}
-        </div>
+      <div className="flex items-center gap-2">
+        <TriangleAlert aria-hidden="true" className="size-4 shrink-0 text-danger" />
+        <Text size="body" className="min-w-0 flex-1">
+          {message.content || 'The assistant could not finish this turn.'}
+        </Text>
+        {onRetry ? (
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => onRetry(message.id)}
+            disabled={retryDisabled}
+            className="shrink-0 border-border-default bg-bg-surface text-text-primary hover:bg-bg-subtle focus-visible:ring-offset-0"
+          >
+            <RotateCcw aria-hidden="true" className="size-3.5" />
+            Retry
+          </Button>
+        ) : null}
       </div>
     </div>
   );
