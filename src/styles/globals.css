@@ -1,6 +1,18 @@
 @import 'tailwindcss';
 @import '../tokens/tokens.css';
 
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* Motion timings adapted from transitions.dev. */
+:root {
+  --duration-quick: 150ms;
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --icon-swap-dur: 250ms;
+  --icon-swap-blur: 1px;
+  --icon-swap-start-scale: 1;
+  --icon-swap-ease: ease-in-out;
+}
+
 @theme inline {
   --color-bg-page: var(--color-bg-page);
   --color-bg-surface: var(--color-bg-surface);
@@ -24,6 +36,8 @@
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --font-sans: var(--font-sans);
+  --text-caption: 0.6875rem;
+  --text-caption--line-height: 1rem;
 }
 
 html,
@@ -35,12 +49,157 @@ body,
   font-family: var(--font-sans);
 }
 
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-text-tertiary) transparent;
+  }
+
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+}
+
+.t-icon-swap {
+  position: relative;
+  display: inline-grid;
+}
+.t-icon-swap .t-icon {
+  grid-area: 1 / 1;
+  transition:
+    opacity   var(--icon-swap-dur) var(--icon-swap-ease),
+    filter    var(--icon-swap-dur) var(--icon-swap-ease),
+    transform var(--icon-swap-dur) var(--icon-swap-ease);
+  will-change: opacity, filter, transform;
+}
+.t-icon-swap[data-state="a"] .t-icon[data-icon="a"],
+.t-icon-swap[data-state="b"] .t-icon[data-icon="b"] {
+  opacity: 1;
+  filter: blur(0);
+  transform: scale(1);
+}
+.t-icon-swap[data-state="a"] .t-icon[data-icon="b"],
+.t-icon-swap[data-state="b"] .t-icon[data-icon="a"] {
+  opacity: 0;
+  filter: blur(var(--icon-swap-blur));
+  transform: scale(var(--icon-swap-start-scale));
+}
+
+@keyframes assistant-surface-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--surface-enter-y, 4px));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.assistant-surface-in {
+  animation: assistant-surface-in var(--duration-quick) var(--ease-smooth-out);
+}
+
+@keyframes assistant-source-swap {
+  from {
+    opacity: 0.4;
+    transform: translateX(var(--source-enter-x, 6px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.assistant-source-swap {
+  animation: assistant-source-swap var(--duration-quick) var(--ease-smooth-out);
+}
+
+@keyframes psynth-chunk-in {
+  from {
+    top: 4px;
+    opacity: 0.4;
+  }
+  to {
+    top: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes psynth-dot {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  42% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+  72% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+}
+
+@keyframes psynth-word-in {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+    transform: translateX(7px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateX(0);
+  }
+}
+
+@keyframes psynth-word-out {
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    filter: blur(5px);
+    transform: translateX(-7px);
+  }
+}
+
+.psynth-word-in {
+  animation: psynth-word-in 260ms ease-out forwards;
+}
+
+.psynth-word-out {
+  animation: psynth-word-out 220ms ease-in forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Box-shadow focus rings disappear in forced-colors mode. */
+@media (forced-colors: active) {
+  * {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+
+  :focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  [role='log']:focus-visible {
+    outline-offset: -2px;
   }
 }

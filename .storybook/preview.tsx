@@ -5,6 +5,7 @@ import '../src/styles/globals.css';
 const preview: Preview = {
   parameters: {
     layout: 'padded',
+    backgrounds: { disable: true },
     controls: { expanded: true },
     a11y: { test: 'todo' },
     docs: { toc: true },
