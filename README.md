@@ -34,7 +34,7 @@ npm test          # must stay green, including the tests you add
 npm run storybook # http://localhost:6006 — this is the deliverable
 ```
 
-`npm run dev` is not the deliverable; it only points back here.
+Storybook is the deliverable; there is no separate demo page.
 
 ---
 
@@ -144,3 +144,35 @@ Send us the **GitHub repo URL** of your template/fork. Before you send it, this 
 - [ ] Optional: a short note in this README (your fork) if you stopped at 8 hours
 
 We review for about 20–30 minutes: `npm test`, the five stories (light and dark), `DISCLOSURE.md`, and `src/assistant/index.ts`.
+
+---
+
+## Notes on this submission
+
+**Timebox: 8 hours, used in full.** The surface here is larger than eight unassisted
+hours would produce; the reason is that the work was done with Claude Code and Codex.
+`DISCLOSURE.md` sets out what each tool did and which calls were mine.
+
+### Where to look
+
+| Path | What |
+| --- | --- |
+| `src/assistant/index.ts` | Public surface: `AssistantPanel`, `AssistantMessage`, `Composer`, `SuggestionChips`, plus the `CitationList` helper and the types |
+| `Assistant/Overview` (Storybook) | The contract, the states table, and the accessibility decisions in one page |
+| `src/assistant/mocks/` | Story-only harness. Fakes streaming with `useFakeStream` and owns thread state the way the product would — **not** exported from `index.ts` |
+| `src/assistant/*/*.test.tsx` | Required interactions plus controller, focus and scroll regression checks |
+
+Start with the five stories under `Assistant/Panel`. `thread` selects the fixture conversation,
+`density` changes spacing, and `streamSpeedMs` sets the response speed. Changing the thread or speed
+restarts the simulation. The harness updates `messages`, `value` and `status` as you interact;
+the props table documents the controlled panel itself.
+
+Try a new question from Error while the old failure remains, then retry it after the new answer
+finishes. DenseThread includes paragraphs and citations: scroll up, expand the composer, and use
+Jump to present to check how reading position and keyboard focus behave.
+
+WithCitations exposes the `onCitationClick` callback inside Storybook, so you can see which
+source a chip reports without leaving the story.
+
+See `Assistant/Overview` for the component contract and accessibility behaviour, and
+[DISCLOSURE.md](./DISCLOSURE.md) for AI assistance, verification and remaining limitations.
