@@ -1,0 +1,88 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Assistant/Overview" />
+
+# Assistant
+
+A report assistant composed from the supplied primitives and semantic tokens. The panel fills its
+container; the stories frame it at 420 × 640, shrinking to fit a shorter window, in light and dark
+themes.
+
+## Components
+
+<table>
+  <thead><tr><th align="left">Component</th><th align="left">Responsibility</th></tr></thead>
+  <tbody>
+    <tr><td><code>AssistantPanel</code></td><td>Header, scrollable thread, composer, focus and turn announcements.</td></tr>
+    <tr><td><code>AssistantMessage</code></td><td>A user or assistant turn, including streaming, failure and sources.</td></tr>
+    <tr><td><code>Composer</code></td><td>Controlled input with send and stop.</td></tr>
+    <tr><td><code>SuggestionChips</code></td><td>Suggested prompts that submit directly.</td></tr>
+    <tr><td><code>CitationList</code></td><td>Source chips used by AssistantMessage.</td></tr>
+  </tbody>
+</table>
+
+## Host contract
+
+The host owns the conversation and composer value. The public exports live in `src/assistant/index.ts`.
+
+```tsx
+<AssistantPanel
+  messages={messages}
+  status={status}
+  value={value}
+  onValueChange={setValue}
+  onSubmit={send}
+  onStop={abort}
+  onRetry={retry}              // failed message id
+  onSuggestionSelect={send}
+  onCitationClick={openSource} // Citation object
+  suggestions={sampleSuggestions}
+/>
+```
+
+`status` describes the panel (`idle`, `streaming`, `error`); `message.status` describes one turn
+(`done`, `streaming`, `error`). The host should prevent concurrent turns, retain partial text on
+stop, and replace a retried message in place. The shared mock controller demonstrates this contract.
+
+During streaming, the field remains editable, Send becomes Stop, and Enter and Retry cannot start
+another turn. In error, the composer remains usable. Optional handlers affect available actions:
+without a handler, suggestions and Stop are disabled, Retry is omitted, and sources render as text.
+
+## Keyboard and accessibility
+
+- **Enter** submits trimmed text; **Shift + Enter** inserts a line. Enter during IME composition
+  does not submit. The visible input hint changes during streaming.
+- Each message is an `article` named **User message** or **Assistant message**. There is no visible
+  role caption: the layout separates them, and the assistant turn carries the product mark.
+  Message text is reached through screen-reader navigation; controls and the scrollable log are tabbable.
+- Suggestions, Retry, Send and Stop leave focus in the composer. **Jump to present** returns focus
+  to the conversation. Incoming text does not move keyboard focus.
+- The log has `aria-live="off"`. A separate polite status region announces **responding**, **complete**,
+  **stopped** or **failed**. A failure mentions Retry only when a failed turn and its handler exist.
+  The completed answer remains available in the log rather than being announced automatically.
+- Auto-scroll follows while the reader is within 48 px of the bottom. It observes both content and
+  viewport height, including composer growth and density changes. Scrolling farther up releases it.
+- Sources include their kind in the accessible name and preserve the full title when visually truncated.
+- Focus rings have an outline fallback for forced colours. Reduced motion disables all CSS
+  animations and transitions, and makes programmatic scrolling instant, including explicit smooth jumps.
+
+## Stories and simulation
+
+The five panel stories cover Empty, Streaming, Error, WithCitations and DenseThread. Each has
+descriptions and controls. `thread` selects a fixture, `density` changes spacing without reducing
+type size, and `streamSpeedMs` sets the interval between batches of up to 12 words (240ms by default). Thread and speed changes restart the
+simulation; the harness owns the live status. Streaming starts a response on mount.
+
+The host delivers readable batches instead of simulating keystrokes. The panel shows all received
+text immediately with a brief fade and light blur on the new fragment; it does not wait to fill a batch. Earlier
+text remains steady, and reduced motion disables the animation. The intent is to make useful answer
+content available for reading sooner.
+
+WithCitations shows the selected source below the panel. DenseThread mixes ten fixture
+messages with longer paragraphs and sources. All content is sample data.
+
+Supporting motion is limited to the Send/Stop icon swap, source-preview entry and Jump to present
+with its tooltip. These transitions do not delay actions or focus; previews dismiss immediately.
+
+`src/assistant/mocks/` is excluded from the public exports: it is a story harness, not part of the
+component surface a host consumes.
